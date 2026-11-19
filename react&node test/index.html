@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technical Assessment Simulator — JavaScript, React & Node.js</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-elevated: #263349;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --brand: #f97316;
+      --brand-hover: #ea580c;
+      --js-color: #eab308;
+      --react-color: #38bdf8;
+      --node-color: #22c55e;
+      --success: #10b981;
+      --danger: #ef4444;
+      --code-bg: #090d16;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f97316, #fb923c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .brand-title h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .brand-title p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .timer-badge {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .timer-badge.warning {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .mode-switch {
+      display: flex;
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 3px;
+      border: 1px solid var(--border);
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.4rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .mode-btn.active {
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 960px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 0.85rem;
+    }
+
+    .track-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .track-tab {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 0.85rem;
+      background: var(--surface-elevated);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .track-tab:hover {
+      border-color: var(--border);
+    }
+
+    .track-tab.active {
+      border-color: var(--brand);
+      background: rgba(249, 115, 22, 0.12);
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .badge-js {
+      background: rgba(234, 179, 8, 0.18);
+      color: var(--js-color);
+    }
+
+    .badge-react {
+      background: rgba(56, 189, 248, 0.18);
+      color: var(--react-color);
+    }
+
+    .badge-node {
+      background: rgba(34, 197, 94, 0.18);
+      color: var(--node-color);
+    }
+
+    .badge-code {
+      background: rgba(249, 115, 22, 0.18);
+      color: var(--brand);
+    }
+
+    .question-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.45rem;
+    }
+
+    .q-pill {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--code-bg);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .q-pill.current {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.35);
+      color: #fff;
+    }
+
+    .q-pill.answered {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--react-color);
+      color: #fff;
+    }
+
+    .q-pill.flagged {
+      border-color: var(--js-color);
+      background: rgba(234, 179, 8, 0.22);
+    }
+
+    .q-pill.correct {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .q-pill.wrong {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: var(--danger);
+      color: #fff;
+    }
+
+    .question-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .question-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .question-type-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: var(--surface-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .question-type-tag.multi {
+      color: #fcd34d;
+      border-color: rgba(252, 211, 77, 0.4);
+      background: rgba(252, 211, 77, 0.1);
+    }
+
+    .question-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    pre.code-snippet {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: #e2e8f0;
+      margin-bottom: 1.25rem;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-elevated);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .option-item:hover {
+      border-color: #64748b;
+    }
+
+    .option-item.selected {
+      border-color: var(--brand);
+      background: rgba(249, 115, 22, 0.12);
+    }
+
+    .option-item.correct-reveal {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .option-item.wrong-reveal {
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .option-marker {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .option-marker.checkbox {
+      border-radius: 5px;
+    }
+
+    .option-item.selected .option-marker {
+      border-color: var(--brand);
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .option-content {
+      font-size: 0.95rem;
+      flex: 1;
+    }
+
+    .option-content code,
+    .question-text code,
+    .explanation-box code {
+      background: var(--code-bg);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.86em;
+      color: #38bdf8;
+    }
+
+    .explanation-box {
+      background: rgba(16, 185, 129, 0.08);
+      border-left: 4px solid var(--success);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.92rem;
+    }
+
+    .explanation-box h4 {
+      color: var(--success);
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.15rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn:hover:not(:disabled) {
+      border-color: #94a3b8;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--brand-hover);
+      border-color: var(--brand-hover);
+    }
+
+    .btn-success {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .score-banner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-box {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-box .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-top: 0.25rem;
+    }
+
+    .code-editor {
+      width: 100%;
+      min-height: 260px;
+      background: var(--code-bg);
+      color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      resize: vertical;
+      margin-bottom: 1rem;
+    }
+
+    .test-output {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-logo">B</div>
+      <div class="brand-title">
+        <h1>Online Skills Assessment</h1>
+        <p>JavaScript (ES6+) • React 18 • Node.js & Express</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="mode-switch">
+        <button id="modeExamBtn" class="mode-btn active" onclick="setMode('exam')">Timed Exam Mode</button>
+        <button id="modeStudyBtn" class="mode-btn" onclick="setMode('study')">Study / Instant Reveal</button>
+      </div>
+      <div id="timerDisplay" class="timer-badge">⏱ 60:00</div>
+      <button class="btn btn-success" onclick="submitAssessment()">Submit & Grade Test</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <aside class="sidebar">
+      <div class="card">
+        <div class="card-title">Assessment Modules</div>
+        <div class="track-tabs">
+          <button class="track-tab active" data-track="ALL" onclick="filterTrack('ALL')">
+            <span>All MCQs</span>
+            <span class="badge badge-code">45 Qs</span>
+          </button>
+          <button class="track-tab" data-track="JavaScript" onclick="filterTrack('JavaScript')">
+            <span>1. JavaScript Core</span>
+            <span class="badge badge-js">15 Qs</span>
+          </button>
+          <button class="track-tab" data-track="React" onclick="filterTrack('React')">
+            <span>2. React & Hooks</span>
+            <span class="badge badge-react">15 Qs</span>
+          </button>
+          <button class="track-tab" data-track="Node.js" onclick="filterTrack('Node.js')">
+            <span>3. Node.js & Express</span>
+            <span class="badge badge-node">15 Qs</span>
+          </button>
+          <button class="track-tab" data-track="CODING" onclick="showCodingChallenges()">
+            <span>4. Coding Challenges</span>
+            <span class="badge badge-code">3 Tasks</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card" id="navigatorCard">
+        <div class="card-title">Question Navigator</div>
+        <div id="questionGrid" class="question-grid"></div>
+        <div
+          style="margin-top: 0.85rem; font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+          <span><span id="answeredCount">0</span> / 45 Answered</span>
+          <span>Target: ≥ 80% (Top 10%)</span>
+        </div>
+      </div>
+    </aside>
+
+    <section id="mainContent">
+      <div id="resultsPanel" class="card" style="display: none; margin-bottom: 1.5rem;"></div>
+
+      <div id="mcqContainer" class="card">
+        <div class="question-header">
+          <div class="question-meta">
+            <span id="qCategoryBadge" class="badge badge-js">JavaScript</span>
+            <span id="qNumberLabel" style="font-weight: 700;">Question 1 of 45</span>
+            <span id="qTopicTag" class="question-type-tag">Event Loop</span>
+            <span id="qSelectTypeTag" class="question-type-tag">Single Choice</span>
+          </div>
+          <button class="btn" id="flagBtn" onclick="toggleFlag()">🚩 Flag for Review</button>
+        </div>
+
+        <div id="qPrompt" class="question-text"></div>
+        <pre id="qSnippet" class="code-snippet" style="display: none;"></pre>
+        <div id="qOptions" class="options-list"></div>
+
+        <div id="qExplanation" class="explanation-box" style="display: none;">
+          <h4>Why this is correct (BairesDev Assessment Insight):</h4>
+          <div id="qExplanationText"></div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn" id="prevBtn" onclick="navigateQuestion(-1)">← Previous</button>
+          <div style="display: flex; gap: 0.65rem;">
+            <button class="btn" id="revealBtn" onclick="revealCurrentAnswer()">Show Explanation</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="navigateQuestion(1)">Next Question →</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="codingContainer" class="card" style="display: none;">
+        <div class="question-header">
+          <div class="question-meta">
+            <span class="badge badge-code">Live Coding Sandbox</span>
+            <span style="font-weight: 700;">Hands-On Practical Challenges (JS, React, Node.js)</span>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn" onclick="selectCodingTask(0)">Task 1: JS Async Pool</button>
+            <button class="btn" onclick="selectCodingTask(1)">Task 2: React Race-Safe Hook</button>
+            <button class="btn" onclick="selectCodingTask(2)">Task 3: Node Rate Limiter</button>
+          </div>
+        </div>
+
+        <h3 id="codingTitle" style="margin-bottom: 0.5rem;"></h3>
+        <p id="codingDesc" style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1rem;"></p>
+
+        <textarea id="codingEditor" class="code-editor" spellcheck="false"></textarea>
+
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="runBrowserCodingTests()">▶ Run Automated Unit Tests</button>
+          <button class="btn" onclick="loadCodingSolution()">💡 Load Reference Solution</button>
+          <button class="btn" onclick="resetCodingStarter()">↺ Reset Starter Code</button>
+        </div>
+
+        <div id="codingOutput" class="test-output">Click "Run Automated Unit Tests" to verify your implementation
+          against BairesDev grading assertions.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const QUESTIONS = [
+      // ==================== JAVASCRIPT (1 - 15) ====================
+      {
+        id: 1,
+        category: 'JavaScript',
+        topic: 'Event Loop & Microtasks',
+        multi: false,
+        prompt: 'What is the exact console output order when the following JavaScript code executes?',
+        snippet: `console.log('1');
+
+setTimeout(() => console.log('2'), 0);
+
+Promise.resolve()
+  .then(() => {
+    console.log('3');
+    return Promise.resolve('4');
+  })
+  .then((val) => console.log(val));
+
+queueMicrotask(() => console.log('5'));
+
+console.log('6');`,
+        options: [
+          '`1`, `6`, `3`, `5`, `4`, `2`',
+          '`1`, `6`, `3`, `4`, `5`, `2`',
+          '`1`, `6`, `5`, `3`, `4`, `2`',
+          '`1`, `3`, `5`, `4`, `6`, `2`'
+        ],
+        correct: [0],
+        explanation: 'Synchronous logs run first (`1`, `6`). Then the microtask queue runs FIFO: the first `.then` callback logs `3` and returns `Promise.resolve("4")` (returning a Promise inside `.then` schedules an extra microtask tick to unwrap it), while `queueMicrotask` is already next in the queue and logs `5`. Then the unwrapped promise resolves and logs `4`. Finally, the macrotask (`setTimeout`) logs `2`.'
+      },
+      {
+        id: 2,
+        category: 'JavaScript',
+        topic: 'Closures & Block Scope',
+        multi: false,
+        prompt: 'What will the following snippet log to the console after 100ms?',
+        snippet: `const funcs = [];
+for (var i = 0; i < 3; i++) {
+  funcs.push(() => i);
+}
+for (let j = 0; j < 3; j++) {
+  funcs.push(() => j);
+}
+console.log(funcs.map(fn => fn()).join(','));`,
+        options: [
+          '`0,1,2,0,1,2`',
+          '`3,3,3,0,1,2`',
+          '`2,2,2,0,1,2`',
+          '`3,3,3,3,3,3`'
+        ],
+        correct: [1],
+        explanation: '`var i` is function/global-scoped, so all 3 closures created in the first loop share the same binding of `i`, which finishes at `3`. `let j` is block-scoped and creates a fresh lexical binding per loop iteration (`0`, `1`, `2`).'
+      },
+      {
+        id: 3,
+        category: 'JavaScript',
+        topic: 'this Context & Arrow Functions',
+        multi: false,
+        prompt: 'What is logged when `service.run()` is invoked in strict mode?',
+        snippet: `'use strict';
+const service = {
+  prefix: 'BD-',
+  items: [10, 20],
+  run() {
+    return this.items.map(function (num) {
+      return this.prefix + num;
+    });
+  }
+};
+console.log(service.run());`,
+        options: [
+          '`["BD-10", "BD-20"]`',
+          '`["undefined10", "undefined20"]`',
+          'Throws a `TypeError: Cannot read properties of undefined (reading \'prefix\')`',
+          '`[NaN, NaN]`'
+        ],
+        correct: [2],
+        explanation: 'A regular `function (num)` passed to `Array.prototype.map` without a second `thisArg` argument is invoked with `this === undefined` in strict mode. Accessing `this.prefix` throws a `TypeError`. Using an arrow function `(num) => this.prefix + num` fixes it by capturing lexical `this` from `run()`.'
+      },
+      {
+        id: 4,
+        category: 'JavaScript',
+        topic: 'Object References & Shallow Copy',
+        multi: false,
+        prompt: 'What will be logged by `console.log(original.meta.count, original.tags.length)`?',
+        snippet: `const original = {
+  meta: { count: 1 },
+  tags: ['js']
+};
+Object.freeze(original);
+const copy = { ...original };
+copy.meta.count = 99;
+copy.tags.push('node');
+
+console.log(original.meta.count, original.tags.length);`,
+        options: [
+          '`1 1`',
+          '`99 2`',
+          'Throws a `TypeError` because `original` is frozen',
+          '`1 2`'
+        ],
+        correct: [1],
+        explanation: 'Both `Object.freeze()` and object spread `{ ...original }` are SHALLOW. `original.meta` and `original.tags` are shared object references between `original` and `copy`, and their inner properties/elements are not frozen unless recursively frozen (`deepFreeze`).'
+      },
+      {
+        id: 5,
+        category: 'JavaScript',
+        topic: 'Promise Combinators',
+        multi: true,
+        prompt: 'Which TWO statements accurately describe the behavior of `Promise.all`, `Promise.allSettled`, and `Promise.any`? (Select 2)',
+        snippet: null,
+        options: [
+          '`Promise.all` rejects immediately as soon as any input promise rejects (fail-fast).',
+          '`Promise.allSettled` rejects if all input promises reject.',
+          '`Promise.any` resolves as soon as the first input promise fulfills, ignoring earlier rejections unless all input promises reject with an `AggregateError`.',
+          '`Promise.all` waits for all promises to settle before rejecting with an array of errors.'
+        ],
+        correct: [0, 2],
+        explanation: '`Promise.all` is fail-fast on the first rejection. `Promise.allSettled` NEVER rejects; it always resolves to an array of `{ status: "fulfilled" | "rejected" }` objects. `Promise.any` resolves on the first fulfilled promise and only rejects (with `AggregateError`) when every input promise rejects.'
+      },
+      {
+        id: 6,
+        category: 'JavaScript',
+        topic: 'Hoisting & Temporal Dead Zone (TDZ)',
+        multi: false,
+        prompt: 'What happens when the following code is executed?',
+        snippet: `var rate = 100;
+function calculate() {
+  console.log(rate);
+  let rate = 200;
+}
+calculate();`,
+        options: [
+          'Logs `100`',
+          'Logs `undefined`',
+          'Throws a `ReferenceError: Cannot access \'rate\' before initialization`',
+          'Logs `200`'
+        ],
+        correct: [2],
+        explanation: 'The `let rate = 200` declaration inside `calculate()` shadows the outer `var rate = 100` across the entire block scope of `calculate`. From the start of the function until `let rate = 200` is evaluated, `rate` is in the Temporal Dead Zone (TDZ), throwing a `ReferenceError`.'
+      },
+      {
+        id: 7,
+        category: 'JavaScript',
+        topic: 'Prototypal Inheritance',
+        multi: false,
+        prompt: 'What is logged by the following prototype inspection snippet?',
+        snippet: `function Developer(name) {
+  this.name = name;
+}
+Developer.prototype.role = 'Engineer';
+
+const dev = new Developer('Mateo');
+delete dev.role;
+console.log(dev.role, Object.hasOwn(dev, 'role'));`,
+        options: [
+          '`undefined false`',
+          '`Engineer false`',
+          '`Engineer true`',
+          '`undefined true`'
+        ],
+        correct: [1],
+        explanation: '`role` lives on `Developer.prototype`, not as an own property on `dev`. `delete dev.role` only deletes own properties and has no effect on prototype properties. Thus `dev.role` still resolves to `"Engineer"` via the prototype chain, while `Object.hasOwn(dev, "role")` is `false`.'
+      },
+      {
+        id: 8,
+        category: 'JavaScript',
+        topic: 'Async / Await Error Handling Trap',
+        multi: false,
+        prompt: 'What is the difference between `return await fetchUser()` and `return fetchUser()` inside a `try / catch` block of an `async` function?',
+        snippet: `async function getUserSafe() {
+  try {
+    return fetchUser(); // returns a Promise that rejects
+  } catch (err) {
+    return { fallback: true };
+  }
+}`,
+        options: [
+          'There is no difference; `try/catch` catches the rejection in both cases.',
+          'Without `return await`, the rejected Promise is returned directly to the caller and bypasses the local `catch` block!',
+          '`return await` causes a syntax error in ES2022+.',
+          'Without `return await`, `getUserSafe()` returns `undefined`.'
+        ],
+        correct: [1],
+        explanation: 'This is a classic BairesDev question: inside a `try/catch` block, `return somePromise()` returns the pending Promise before it settles, so if it rejects, the local `catch` block is NEVER triggered. You must use `return await somePromise()` inside `try/catch` to catch rejections locally.'
+      },
+      {
+        id: 9,
+        category: 'JavaScript',
+        topic: 'WeakMap & Memory Management',
+        multi: true,
+        prompt: 'Why would you choose a `WeakMap` over a standard `Map` for caching computed metadata associated with DOM nodes or user objects? (Select 2)',
+        snippet: null,
+        options: [
+          '`WeakMap` holds weak references to its object keys, allowing keys and their associated values to be garbage-collected when no other references to the key exist.',
+          '`WeakMap` allows iterating over all keys using `.keys()` or `for...of` faster than `Map`.',
+          '`WeakMap` keys must be objects (or non-registered symbols), preventing memory leaks in long-lived caches.',
+          '`WeakMap` automatically serializes its entries to `localStorage`.'
+        ],
+        correct: [0, 2],
+        explanation: '`WeakMap` keys must be objects (or non-registered symbols) and are held weakly—if the object key is garbage-collected elsewhere, the entry disappears automatically, preventing memory leaks. Because GC timing is non-deterministic, `WeakMap` is not iterable.'
+      },
+      {
+        id: 10,
+        category: 'JavaScript',
+        topic: 'Array.prototype.reduce & Edge Cases',
+        multi: false,
+        prompt: 'What happens when the following code runs?',
+        snippet: `const values = [];
+const sum = values.reduce((acc, curr) => acc + curr);
+console.log(sum);`,
+        options: [
+          'Logs `0`',
+          'Logs `undefined`',
+          'Throws `TypeError: Reduce of empty array with no initial value`',
+          'Logs `NaN`'
+        ],
+        correct: [2],
+        explanation: 'Calling `.reduce()` on an empty array without providing a second `initialValue` argument (`values.reduce(fn, 0)`) always throws a `TypeError` at runtime.'
+      },
+      {
+        id: 11,
+        category: 'JavaScript',
+        topic: 'Logical Operators & Nullish Coalescing',
+        multi: false,
+        prompt: 'What is logged to the console?',
+        snippet: `const config = {
+  retries: 0,
+  label: '',
+  timeout: null
+};
+
+console.log(
+  config.retries || 3,
+  config.retries ?? 3,
+  config.label ?? 'default',
+  config.timeout ?? 5000
+);`,
+        options: [
+          '`3 0 "" 5000`',
+          '`0 0 "" 5000`',
+          '`3 3 "default" 5000`',
+          '`3 0 "default" null`'
+        ],
+        correct: [0],
+        explanation: 'Logical OR (`||`) falls back on ANY falsy value (`0`, `""`, `false`, `null`, `undefined`), so `0 || 3` evaluates to `3`. Nullish coalescing (`??`) only falls back on `null` or `undefined`, preserving `0` and `""`.'
+      },
+      {
+        id: 12,
+        category: 'JavaScript',
+        topic: 'Generators & Lazy Evaluation',
+        multi: false,
+        prompt: 'What will be logged by the following generator sequence?',
+        snippet: `function* seq(x) {
+  const y = yield x + 1;
+  const z = yield y * 2;
+  return x + y + z;
+}
+const gen = seq(5);
+console.log(
+  gen.next().value,
+  gen.next(10).value,
+  gen.next(3).value
+);`,
+        options: [
+          '`6 12 18`',
+          '`6 20 18`',
+          '`5 10 3`',
+          '`6 20 undefined`'
+        ],
+        correct: [1],
+        explanation: '1) `gen.next()` runs until the first `yield x + 1` (`5 + 1 = 6`). 2) `gen.next(10)` passes `10` as the result of the first `yield`, so `y = 10`, and yields `y * 2` (`20`). 3) `gen.next(3)` sets `z = 3` and returns `x + y + z` (`5 + 10 + 3 = 18`).'
+      },
+      {
+        id: 13,
+        category: 'JavaScript',
+        topic: 'Object Property Keys & Coercion',
+        multi: false,
+        prompt: 'What does `console.log(map[keyA])` output?',
+        snippet: `const map = {};
+const keyA = { id: 1 };
+const keyB = { id: 2 };
+
+map[keyA] = 'Alpha';
+map[keyB] = 'Beta';
+
+console.log(map[keyA]);`,
+        options: [
+          '`"Alpha"`',
+          '`"Beta"`',
+          '`undefined`',
+          'Throws a `TypeError`'
+        ],
+        correct: [1],
+        explanation: 'Plain JavaScript object keys (unlike `Map`) are coerced to strings if they are not Symbols. Both `keyA` and `keyB` coerce to `"[object Object]"`, so `map[keyB] = "Beta"` overwrites `map["[object Object]"]`.'
+      },
+      {
+        id: 14,
+        category: 'JavaScript',
+        topic: 'Event Propagation (Bubbling vs Capturing)',
+        multi: false,
+        prompt: 'A user clicks `<button id="child">` inside `<div id="parent">`. Given the listeners below, what is logged?',
+        snippet: `parent.addEventListener('click', () => console.log('Parent Bubble'), false);
+parent.addEventListener('click', () => console.log('Parent Capture'), true);
+child.addEventListener('click', () => console.log('Child'));`,
+        options: [
+          '`Child`, `Parent Bubble`, `Parent Capture`',
+          '`Parent Capture`, `Child`, `Parent Bubble`',
+          '`Parent Bubble`, `Child`, `Parent Capture`',
+          '`Parent Capture`, `Parent Bubble`, `Child`'
+        ],
+        correct: [1],
+        explanation: 'DOM events travel in 3 phases: 1) Capturing phase from root down to target (`Parent Capture` has `useCapture = true`), 2) Target phase (`Child`), 3) Bubbling phase back up (`Parent Bubble` has `useCapture = false`).'
+      },
+      {
+        id: 15,
+        category: 'JavaScript',
+        topic: 'Currying & Closure State',
+        multi: false,
+        prompt: 'What is logged by the following snippet?',
+        snippet: `function createCounter(step = 1) {
+  let count = 0;
+  return function () {
+    count += step;
+    return count;
+  };
+}
+const incA = createCounter(2);
+const incB = createCounter(5);
+console.log(incA(), incA(), incB());`,
+        options: [
+          '`2 4 5`',
+          '`2 4 9`',
+          '`2 2 5`',
+          '`1 2 5`'
+        ],
+        correct: [0],
+        explanation: 'Each call to `createCounter` creates an independent lexical environment with its own `count` variable. `incA()` increments its own `count` by 2 (`2`, then `4`), while `incB()` starts at `0` and increments by 5 (`5`).'
+      },
+
+      // ==================== REACT (16 - 30) ====================
+      {
+        id: 16,
+        category: 'React',
+        topic: 'State Batching & Snapshot Closures',
+        multi: false,
+        prompt: 'In React 18, a user clicks the button once when `count` is `0`. What will the rendered `count` and `console.log(count)` be?',
+        snippet: `function Counter() {
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(prev => prev + 1);
+    console.log(count);
+  };
+
+  return <button onClick={handleClick}>{count}</button>;
+}`,
+        options: [
+          'Rendered count: `3`, Console log: `3`',
+          'Rendered count: `2`, Console log: `0`',
+          'Rendered count: `1`, Console log: `0`',
+          'Rendered count: `3`, Console log: `0`'
+        ],
+        correct: [1],
+        explanation: 'During `handleClick`, `count` is a constant snapshot equal to `0`. `setCount(count + 1)` queues `0 + 1 = 1`. The second `setCount(count + 1)` also queues `0 + 1 = 1` (overwriting `1` with `1`). Then `setCount(prev => prev + 1)` receives `1` and returns `2`. Finally, `console.log(count)` logs `0` because state updates do not mutate the current render closure variable.'
+      },
+      {
+        id: 17,
+        category: 'React',
+        topic: 'Stale Closures in useEffect',
+        multi: false,
+        prompt: 'What happens when this `Timer` component mounts and runs for 5 seconds?',
+        snippet: `function Timer() {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSeconds(seconds + 1);
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return <div>{seconds}</div>;
+}`,
+        options: [
+          'It increments `0, 1, 2, 3, 4, 5` as expected.',
+          'It changes from `0` to `1` after 1 second and stays stuck at `1` forever.',
+          'It causes an infinite synchronous re-render loop.',
+          'It throws a React missing dependency runtime error.'
+        ],
+        correct: [1],
+        explanation: 'Because the dependency array is `[]`, the `useEffect` callback runs only on mount and closes over the initial `seconds = 0`. Every tick evaluates `setSeconds(0 + 1)`. Using the functional updater `setSeconds(s => s + 1)` fixes the stale closure without needing `seconds` in the dependency array.'
+      },
+      {
+        id: 18,
+        category: 'React',
+        topic: 'Rules of Hooks & Fiber Architecture',
+        multi: false,
+        prompt: 'Why does React strictly forbid calling Hooks inside `if` statements, loops, or nested functions?',
+        snippet: null,
+        options: [
+          'Because Babel cannot transpile hook calls inside conditional blocks.',
+          'Because React stores Hook state in an internal linked list on the Fiber node indexed by the exact call order across renders.',
+          'Because `useState` relies on hoisting to the top of the function scope.',
+          'Because conditional hooks prevent Garbage Collection of DOM nodes.'
+        ],
+        correct: [1],
+        explanation: 'React does not know the variable names you assign to `useState`. Internally, each component Fiber holds a linked list of hook nodes and walks it by index on every render. If a hook is skipped conditionally, all subsequent hooks read the wrong state slot.'
+      },
+      {
+        id: 19,
+        category: 'React',
+        topic: 'React.memo & Referential Equality',
+        multi: false,
+        prompt: 'Why does `<ExpensiveChild />` still re-render every time `Parent` updates `text`, even though `ExpensiveChild` is wrapped in `React.memo`?',
+        snippet: `const ExpensiveChild = React.memo(({ onAction, config }) => {
+  return <button onClick={onAction}>{config.theme}</button>;
+});
+
+function Parent() {
+  const [text, setText] = useState('');
+  const handleAction = useCallback(() => console.log('Clicked'), []);
+
+  return (
+    <div>
+      <input value={text} onChange={e => setText(e.target.value)} />
+      <ExpensiveChild onAction={handleAction} config={{ theme: 'dark' }} />
+    </div>
+  );
+}`,
+        options: [
+          '`React.memo` only works with class components.',
+          'Although `handleAction` is memoized with `useCallback`, `config={{ theme: \'dark\' }}` creates a brand-new object reference on every render, failing `React.memo`\'s shallow `Object.is` prop comparison.',
+          '`useCallback` creates a new function reference when `[]` is passed.',
+          'Children of a component with `<input>` always bypass `React.memo`.'
+        ],
+        correct: [1],
+        explanation: '`React.memo` performs a shallow comparison (`Object.is`) on all props. Even though `onAction` is stabilized via `useCallback`, passing an inline object literal `config={{ theme: "dark" }}` allocates a new object address every render (`{} !== {}`), invalidating `React.memo`.'
+      },
+      {
+        id: 20,
+        category: 'React',
+        topic: 'Reconciliation & List Keys',
+        multi: false,
+        prompt: 'A list of items with uncontrolled `<input defaultValue={item.name} />` uses the array index (`key={index}`) as the React key. What bug occurs when a new item is prepended (`[newItem, ...items]`) to the start of the list?',
+        snippet: null,
+        options: [
+          'React throws a fatal key collision exception.',
+          'The DOM inputs keep the old values shifted in the wrong rows because React matches `key={0}` to the previous first DOM node.',
+          'All `<input>` values are cleared to empty strings.',
+          'Only the last item in the list is rendered.'
+        ],
+        correct: [1],
+        explanation: 'React uses `key` to match Virtual DOM elements across renders. When you prepend an item and use `key={index}`, the new item gets `key={0}`, which React thinks is the same component instance that previously had `key={0}`, preserving its uncontrolled DOM state in the wrong row!'
+      },
+      {
+        id: 21,
+        category: 'React',
+        topic: 'useEffect Cleanup Lifecycle',
+        multi: false,
+        prompt: 'When a component with the following `useEffect` re-renders because `userId` changed from `1` to `2`, in what exact order do things execute?',
+        snippet: `useEffect(() => {
+  console.log('Subscribe:', userId);
+  return () => {
+    console.log('Cleanup:', userId);
+  };
+}, [userId]);`,
+        options: [
+          '`Subscribe: 2`, then `Cleanup: 1`',
+          '`Cleanup: 2`, then `Subscribe: 2`',
+          'Component renders with `userId = 2` -> DOM updates -> `Cleanup: 1` runs -> `Subscribe: 2` runs',
+          '`Cleanup: 1` runs ONLY when the component completely unmounts from the DOM'
+        ],
+        correct: [2],
+        explanation: 'When dependencies change, React first renders the new UI, commits the DOM update, then runs the previous effect\'s cleanup function with its closure (`Cleanup: 1`), and immediately runs the new effect (`Subscribe: 2`).'
+      },
+      {
+        id: 22,
+        category: 'React',
+        topic: 'useRef vs useState',
+        multi: true,
+        prompt: 'Which statements about `useRef` in React are TRUE? (Select 2)',
+        snippet: null,
+        options: [
+          'Mutating `ref.current` does NOT trigger a component re-render.',
+          'The object returned by `useRef` maintains the exact same object reference across the entire lifetime of the component.',
+          '`ref.current` should be read and written directly during the render calculation to drive conditional JSX output.',
+          'Updating `ref.current` is batched asynchronously just like `useState`.'
+        ],
+        correct: [0, 1],
+        explanation: '`useRef` returns a stable mutable object `{ current: initialValue }` that persists across renders. Mutating `ref.current` happens synchronously and does NOT schedule a re-render.'
+      },
+      {
+        id: 23,
+        category: 'React',
+        topic: 'Context API Re-render Behavior',
+        multi: false,
+        prompt: 'If a `<ThemeContext.Provider value={{ theme, setTheme }}>` sits at the root of an app, and its parent re-renders due to unrelated state, which descendants re-render by default?',
+        snippet: null,
+        options: [
+          'Every single component inside the Provider tree, even if they don\'t call `useContext`.',
+          'Every component that calls `useContext(ThemeContext)`, because `{ theme, setTheme }` is a new object reference unless memoized with `useMemo`.',
+          'No components re-render unless `theme` primitive string changes.',
+          'Only class components using `static contextType`.'
+        ],
+        correct: [1],
+        explanation: 'When a Provider\'s `value` prop receives a new object reference (`value={{ theme, setTheme }}`), ALL consumers calling `useContext(ThemeContext)` are forced to re-render—even if `Child` is wrapped in `React.memo`. Wrapping the context value in `useMemo` prevents unnecessary consumer re-renders.'
+      },
+      {
+        id: 24,
+        category: 'React',
+        topic: 'Error Boundaries',
+        multi: true,
+        prompt: 'Which of the following errors are NOT caught by a React Error Boundary (`componentDidCatch` / `getDerivedStateFromError`)? (Select 2)',
+        snippet: null,
+        options: [
+          'Errors thrown inside an `onClick` or `onSubmit` event handler.',
+          'Errors thrown synchronously inside a child component\'s render method.',
+          'Asynchronous errors inside `setTimeout` or an unhandled `fetch` Promise rejection.',
+          'Errors thrown inside a child\'s `useLayoutEffect` or lifecycle method.'
+        ],
+        correct: [0, 2],
+        explanation: 'React Error Boundaries only catch errors that occur during rendering, in lifecycle methods, and in constructors of the tree below them. They do NOT catch errors inside event handlers (`onClick`) or asynchronous callbacks (`setTimeout`, `fetch` promises).'
+      },
+      {
+        id: 25,
+        category: 'React',
+        topic: 'useLayoutEffect vs useEffect',
+        multi: false,
+        prompt: 'When should you use `useLayoutEffect` instead of `useEffect`?',
+        snippet: null,
+        options: [
+          'For all `fetch()` network requests so data loads faster.',
+          'When you need to measure DOM layout (e.g., `getBoundingClientRect()`) and synchronously mutate/re-render before the browser paints to prevent visual flicker.',
+          'When rendering components on the server (SSR) with Next.js.',
+          'Whenever an effect has more than 3 dependencies.'
+        ],
+        correct: [1],
+        explanation: '`useLayoutEffect` fires synchronously AFTER React mutates the DOM but BEFORE the browser paints the screen. This avoids visual layout jumps/flicker when measuring DOM elements (such as positioning a tooltip).'
+      },
+      {
+        id: 26,
+        category: 'React',
+        topic: 'React 18 Automatic Batching',
+        multi: false,
+        prompt: 'In React 18 (using `createRoot`), how many times does the component re-render when the `fetch().then(...)` callback below executes?',
+        snippet: `function Profile() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/user').then((res) => {
+      setUser({ name: 'Sofia' });
+      setLoading(false);
+    });
+  }, []);
+
+  return <div>{loading ? 'Loading' : user.name}</div>;
+}`,
+        options: [
+          '2 times (because state updates inside Promises are never batched)',
+          '1 time (React 18 automatically batches state updates inside Promises, `setTimeout`, and native event handlers)',
+          '3 times',
+          '0 times unless wrapped in `unstable_batchedUpdates`'
+        ],
+        correct: [1],
+        explanation: 'Prior to React 18, only React synthetic event handlers were batched. With React 18\'s `createRoot`, Automatic Batching groups multiple state updates inside Promises, `setTimeout`, and native event listeners into a single re-render.'
+      },
+      {
+        id: 27,
+        category: 'React',
+        topic: 'Derived State Anti-Pattern',
+        multi: false,
+        prompt: 'Why is the following pattern considered a React anti-pattern?',
+        snippet: `function FilteredList({ items, query }) {
+  const [filtered, setFiltered] = useState([]);
+
+  useEffect(() => {
+    setFiltered(items.filter(i => i.includes(query)));
+  }, [items, query]);
+
+  return <List data={filtered} />;
+}`,
+        options: [
+          '`items.filter` mutates the `items` prop in place.',
+          'It causes an unnecessary double render pass (first rendering stale `filtered` state, then running `useEffect` and triggering a second render) instead of computing derived state during render (or with `useMemo`).',
+          '`useEffect` cannot read props.',
+          '`useState` cannot hold arrays.'
+        ],
+        correct: [1],
+        explanation: 'Storing values that can be computed directly from props/state inside `useState` + `useEffect` causes an extra cascading render on every prop change. Instead, compute `const filtered = useMemo(() => items.filter(...), [items, query])` directly during render.'
+      },
+      {
+        id: 28,
+        category: 'React',
+        topic: 'Controlled vs Uncontrolled Inputs',
+        multi: false,
+        prompt: 'What causes React to log the warning: `"A component is changing an uncontrolled input to be controlled"`?',
+        snippet: null,
+        options: [
+          'Passing `readOnly` to an `<input>` element.',
+          'Initializing state as `const [name, setName] = useState()` (`undefined`), passing `value={name}` to `<input>`, and later calling `setName("abc")`.',
+          'Using `onChange` instead of `onInput`.',
+          'Using `useRef` on a `<form>` element.'
+        ],
+        correct: [1],
+        explanation: 'When `value={undefined}` is passed to `<input>`, React treats it as an uncontrolled input. When state later updates to a string (`"abc"`), it switches to controlled. Always initialize controlled string inputs with `useState("")`.'
+      },
+      {
+        id: 29,
+        category: 'React',
+        topic: 'Custom Hooks & State Sharing',
+        multi: false,
+        prompt: 'If Component A and Component B both call the same custom hook `const [isOpen, toggle] = useModal()`, do they share the `isOpen` state?',
+        snippet: null,
+        options: [
+          'Yes, custom hooks create a singleton state shared across all callers.',
+          'No, custom hooks share stateful logic, NOT state itself; each call creates completely isolated state attached to the calling component.',
+          'Yes, if both components are rendered inside the same parent.',
+          'Only if `useModal` uses `useCallback`.'
+        ],
+        correct: [1],
+        explanation: 'Custom hooks are a mechanism to reuse stateful logic. Every time a component calls a custom hook, all `useState` and `useEffect` calls inside it are bound exclusively to that specific component instance.'
+      },
+      {
+        id: 30,
+        category: 'React',
+        topic: 'React 18 Concurrent Features (useTransition)',
+        multi: false,
+        prompt: 'What is the primary purpose of `startTransition` from `useTransition()` in React 18?',
+        snippet: null,
+        options: [
+          'To animate CSS opacity transitions between route changes.',
+          'To mark a state update as non-urgent (interruptible) so urgent updates like typing in an input remain responsive without blocking the main thread.',
+          'To debounce network `fetch` requests by 300ms.',
+          'To run state updates on a background Web Worker thread.'
+        ],
+        correct: [1],
+        explanation: '`useTransition` lets you mark expensive UI state updates (like filtering a huge table) as low-priority transitions. If the user types another character mid-render, React interrupts the low-priority render to handle the urgent input immediately.'
+      },
+
+      // ==================== NODE.JS (31 - 45) ====================
+      {
+        id: 31,
+        category: 'Node.js',
+        topic: 'Event Loop: process.nextTick vs setImmediate',
+        multi: false,
+        prompt: 'Inside a Node.js `fs.readFile` I/O callback, what is the exact execution order of the following logs?',
+        snippet: `const fs = require('node:fs');
+
+fs.readFile(__filename, () => {
+  setTimeout(() => console.log('timeout'), 0);
+  setImmediate(() => console.log('immediate'));
+  process.nextTick(() => console.log('nextTick'));
+  Promise.resolve().then(() => console.log('promise'));
+});`,
+        options: [
+          '`nextTick`, `promise`, `timeout`, `immediate`',
+          '`nextTick`, `promise`, `immediate`, `timeout`',
+          '`immediate`, `nextTick`, `promise`, `timeout`',
+          '`promise`, `nextTick`, `immediate`, `timeout`'
+        ],
+        correct: [1],
+        explanation: '1) `process.nextTick` queue always runs first after the current callback completes, before Promises (`nextTick`, then `promise`). 2) Because we are inside an I/O callback (Poll phase), the Event Loop always transitions directly to the **Check phase** (`setImmediate`) BEFORE looping back around to the **Timers phase** (`setTimeout`). So `immediate` is guaranteed to log before `timeout`!'
+      },
+      {
+        id: 32,
+        category: 'Node.js',
+        topic: 'CommonJS exports vs module.exports',
+        multi: false,
+        prompt: 'What is logged in `index.js` when importing `math.js` below?',
+        snippet: `// math.js
+exports.add = (a, b) => a + b;
+exports = {
+  add: (a, b) => a * b,
+  subtract: (a, b) => a - b
+};
+
+// index.js
+const math = require('./math');
+console.log(math.add(2, 3), math.subtract);`,
+        options: [
+          '`6 [Function: subtract]`',
+          '`5 undefined`',
+          '`6 undefined`',
+          'Throws a `ReferenceError: exports is not defined`'
+        ],
+        correct: [1],
+        explanation: 'In CommonJS, `exports` starts as a reference parameter pointing to `module.exports`. First, `exports.add` attaches `add` (`a + b`) to `module.exports`. Then `exports = { ... }` reassigns the local `exports` variable to a new object without changing `module.exports`! `require()` always returns `module.exports`.'
+      },
+      {
+        id: 33,
+        category: 'Node.js',
+        topic: 'Express Error-Handling Middleware Signature',
+        multi: false,
+        prompt: 'Why is the following Express error-handling middleware NEVER triggered when a route calls `next(new Error("DB Failed"))`?',
+        snippet: `app.use((err, req, res) => {
+  res.status(500).json({ error: err.message });
+});`,
+        options: [
+          'Error middleware must be registered BEFORE all routes.',
+          'Express checks `fn.length === 4` (function parameter count) to identify error-handling middleware; omitting the 4th parameter `next` (`(err, req, res, next)`) makes Express treat it as normal 3-arg middleware `(req, res, next)`.',
+          'Express requires `app.onError()` instead of `app.use()`.',
+          '`res.status(500)` is invalid in Express.'
+        ],
+        correct: [1],
+        explanation: 'Express inspects `middleware.length` (the number of declared parameters). An error-handling middleware MUST declare all 4 arguments `(err, req, res, next)` even if `next` is not called inside the function body.'
+      },
+      {
+        id: 34,
+        category: 'Node.js',
+        topic: 'HTTP Headers Sent Error',
+        multi: false,
+        prompt: 'What runtime bug exists in this Express route handler when ` !req.headers.authorization ` is true?',
+        snippet: `app.get('/orders', (req, res) => {
+  if (!req.headers.authorization) {
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.status(200).json({ orders: [1, 2, 3] });
+});`,
+        options: [
+          'The response status becomes `200` and overwrites `401` silently.',
+          'Calling `res.json()` does not exit the function; without `return res.status(401).json(...)`, execution continues to the second `res.json()` and throws `ERR_HTTP_HEADERS_SENT`.',
+          'Express automatically stops execution on the first `res.json()`.',
+          'It causes a memory leak in the V8 heap.'
+        ],
+        correct: [1],
+        explanation: '`res.json()` sends the HTTP response but does NOT return from the JavaScript function. Without `return`, the handler continues executing and attempts to send a second response on the same socket, throwing `Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client`.'
+      },
+      {
+        id: 35,
+        category: 'Node.js',
+        topic: 'Streams & Backpressure',
+        multi: false,
+        prompt: 'When writing large volumes of data to a Node.js `Writable` stream using `writable.write(chunk)`, what does it mean when `writable.write(chunk)` returns `false`?',
+        snippet: null,
+        options: [
+          'The write operation failed and the chunk was dropped; you must retry writing the same chunk.',
+          'The internal buffer has exceeded `highWaterMark` (backpressure); the chunk WAS queued, but the producer should pause writing until the `"drain"` event is emitted.',
+          'The stream has already closed permanently.',
+          'The chunk contained invalid UTF-8 bytes.'
+        ],
+        correct: [1],
+        explanation: '`writable.write(chunk)` returning `false` indicates **backpressure**: the chunk was accepted into the buffer, but the buffer is now full (`>= highWaterMark`). Continuing to call `.write()` without waiting for the `"drain"` event will buffer unbounded data in RAM and can crash the process with Out-Of-Memory.'
+      },
+      {
+        id: 36,
+        category: 'Node.js',
+        topic: 'libuv Thread Pool vs OS Kernel Async I/O',
+        multi: true,
+        prompt: 'Which TWO operations in Node.js use the `libuv` Worker Thread Pool (default size `UV_THREADPOOL_SIZE = 4`) rather than non-blocking OS kernel sockets? (Select 2)',
+        snippet: null,
+        options: [
+          'File system operations (`fs.readFile`, `fs.stat`)',
+          'Incoming HTTP/TCP network socket requests (`http.createServer`, `net`)',
+          'CPU-intensive asynchronous crypto functions (`crypto.pbkdf2`, `crypto.scrypt`) and `dns.lookup()`',
+          '`setTimeout` and `setInterval` timers'
+        ],
+        correct: [0, 2],
+        explanation: 'Network I/O (`http`, `net`) is handled directly by OS kernel async primitives (`epoll`/`kqueue`/`IOCP`) without touching the thread pool. In contrast, `fs.*` calls, `dns.lookup()`, `zlib`, and async `crypto` (`pbkdf2`/`scrypt`) run on the `libuv` thread pool.'
+      },
+      {
+        id: 37,
+        category: 'Node.js',
+        topic: 'EventEmitter Error Handling',
+        multi: false,
+        prompt: 'What happens in Node.js if an `EventEmitter` instance emits an `"error"` event (`emitter.emit("error", new Error("fail"))`) and no listener is registered for `"error"`?',
+        snippet: null,
+        options: [
+          'The error is silently ignored like any other unhandled event name.',
+          'Node.js logs a warning and continues running.',
+          'The error is thrown as an uncaught exception, printing a stack trace and crashing the Node.js process (unless `process.on("uncaughtException")` handles it).',
+          'The `EventEmitter` automatically retries the previous event.'
+        ],
+        correct: [2],
+        explanation: 'In Node.js, `"error"` is a special event on `EventEmitter`. If an `"error"` event is emitted with no registered `"error"` listener, Node throws the error synchronously, crashing the process if uncaught.'
+      },
+      {
+        id: 38,
+        category: 'Node.js',
+        topic: 'Buffer Security & Memory',
+        multi: false,
+        prompt: 'What is the critical security difference between `Buffer.alloc(1024)` and `Buffer.allocUnsafe(1024)`?',
+        snippet: null,
+        options: [
+          '`Buffer.allocUnsafe` can overflow the buffer length.',
+          '`Buffer.alloc` zero-fills the allocated memory, whereas `Buffer.allocUnsafe` is faster because it does NOT initialize the memory and may contain sensitive old in-memory data (passwords, keys, tokens) if not overwritten.',
+          '`Buffer.allocUnsafe` allocates memory on disk instead of RAM.',
+          'There is no difference in Node.js 18+.'
+        ],
+        correct: [1],
+        explanation: '`Buffer.allocUnsafe(size)` skips zero-filling for performance, meaning the returned buffer slice can contain old fragments of previously freed memory from the V8/process heap.'
+      },
+      {
+        id: 39,
+        category: 'Node.js',
+        topic: 'Cluster vs Worker Threads',
+        multi: false,
+        prompt: 'You have an Express route that performs heavy synchronous image matrix transformations in JavaScript, blocking the Event Loop for 800ms per request. Which native Node.js module is specifically designed to offload CPU-bound JavaScript work while sharing memory via `SharedArrayBuffer`?',
+        snippet: null,
+        options: [
+          '`node:worker_threads`',
+          '`node:cluster`',
+          '`node:dgram`',
+          '`node:async_hooks`'
+        ],
+        correct: [0],
+        explanation: '`worker_threads` spawns isolated V8 instances within the SAME OS process that can offload CPU-intensive JS tasks and share memory via `SharedArrayBuffer`. (`cluster` forks separate OS processes primarily to scale HTTP servers across CPU cores).'
+      },
+      {
+        id: 40,
+        category: 'Node.js',
+        topic: 'Module Caching in require()',
+        multi: false,
+        prompt: 'If `moduleA.js` and `moduleB.js` both call `const db = require("./db.js")` in the same Node.js process, how many times is `db.js` executed?',
+        snippet: null,
+        options: [
+          'Twice (once per `require` call).',
+          'Once; Node.js caches the exported object in `require.cache` keyed by resolved filename and returns the same cached reference on subsequent `require()` calls.',
+          'Once per HTTP request.',
+          'It throws a duplicate import error.'
+        ],
+        correct: [1],
+        explanation: 'CommonJS modules are cached in `require.cache` after the first time they are loaded. Subsequent `require("./db.js")` calls return the exact same cached `module.exports` object reference.'
+      },
+      {
+        id: 41,
+        category: 'Node.js',
+        topic: 'Child Processes: spawn vs exec',
+        multi: false,
+        prompt: 'Why should you use `child_process.spawn()` instead of `child_process.exec()` when running a CLI command that outputs a 500MB log stream?',
+        snippet: null,
+        options: [
+          '`exec()` does not support command-line arguments.',
+          '`exec()` buffers the entire stdout/stderr in memory (up to `maxBuffer`, throwing an error when exceeded) and spawns a shell by default, whereas `spawn()` streams stdout/stderr chunk-by-chunk without a shell.',
+          '`spawn()` is synchronous and blocks the event loop.',
+          '`exec()` only works on Linux.'
+        ],
+        correct: [1],
+        explanation: '`child_process.exec` buffers all output in memory until the process exits and fails if output exceeds `maxBuffer`. It also runs inside a shell (creating command injection risk if user input is interpolated). `spawn` streams data via `child.stdout` and does not spawn a shell by default.'
+      },
+      {
+        id: 42,
+        category: 'Node.js',
+        topic: 'Express Async Error Handling',
+        multi: false,
+        prompt: 'In Express 4.x (without an async wrapper), what happens if an `async (req, res, next)` route handler throws an error or awaits a rejected Promise without a `try/catch` block?',
+        snippet: `app.get('/users/:id', async (req, res, next) => {
+  const user = await db.findUserOrThrow(req.params.id); // Rejects!
+  res.json(user);
+});`,
+        options: [
+          'Express 4 automatically catches the rejected Promise and forwards it to the 4-arg error middleware.',
+          'Express 4 does NOT catch rejected Promises returned by route handlers; it triggers an `UnhandledPromiseRejection` (crashing Node 15+ by default) and leaves the HTTP request hanging unless caught and passed to `next(err)`.',
+          'Express automatically responds with `404 Not Found`.',
+          'The route automatically retries 3 times.'
+        ],
+        correct: [1],
+        explanation: 'In Express 4.x, synchronous throws inside routes are caught, but rejected Promises from `async` handlers are NOT automatically forwarded to `next(err)`. You must wrap with `try { ... } catch (e) { next(e); }` (or use an `asyncHandler` utility / Express 5).'
+      },
+      {
+        id: 43,
+        category: 'Node.js',
+        topic: 'Starving the Event Loop with process.nextTick',
+        multi: false,
+        prompt: 'What happens if a recursive function schedules itself continuously using `process.nextTick(run)` vs `setImmediate(run)`?',
+        snippet: null,
+        options: [
+          'Both behave identically.',
+          'Recursive `process.nextTick` starves the Event Loop completely (I/O callbacks and timers never get a chance to run), whereas recursive `setImmediate` yields to the Poll I/O phase on each tick.',
+          'Recursive `setImmediate` blocks the I/O Poll phase forever.',
+          '`process.nextTick` automatically throttles after 10 calls.'
+        ],
+        correct: [1],
+        explanation: 'Node drains the `nextTickQueue` completely before moving to the next phase of the Event Loop. Recursive `process.nextTick` prevents Node from ever reaching the I/O Poll phase. `setImmediate` queues callbacks for the NEXT iteration of the Check phase, allowing I/O to be processed between calls.'
+      },
+      {
+        id: 44,
+        category: 'Node.js',
+        topic: 'Package.json SemVer Ranges',
+        multi: false,
+        prompt: 'In `package.json`, what is the difference between `"express": "^4.18.2"` and `"express": "~4.18.2"`?',
+        snippet: null,
+        options: [
+          '`^4.18.2` allows minor and patch updates (`>=4.18.2 <5.0.0`), while `~4.18.2` allows only patch updates (`>=4.18.2 <4.19.0`).',
+          '`^4.18.2` allows major updates (`5.x.x`), while `~4.18.2` allows minor updates.',
+          'They are aliases for the exact same version range.',
+          '`~4.18.2` locks the exact version `4.18.2` with no updates.'
+        ],
+        correct: [0],
+        explanation: 'Caret (`^`) allows changes that do not modify the left-most non-zero digit (`4.x.x`, i.e., minor + patch). Tilde (`~`) allows patch-level changes if a minor version is specified (`4.18.x`).'
+      },
+      {
+        id: 45,
+        category: 'Node.js',
+        topic: 'Graceful Shutdown in Production',
+        multi: false,
+        prompt: 'When a containerized Node.js HTTP server receives `SIGTERM` during a deployment, what is the proper sequence for a graceful shutdown?',
+        snippet: null,
+        options: [
+          'Call `process.exit(0)` immediately inside the `SIGTERM` handler.',
+          'Call `server.close()` to stop accepting new connections while allowing in-flight HTTP requests to finish, then close database pools and exit.',
+          'Ignore `SIGTERM` and wait for `SIGKILL`.',
+          'Delete `require.cache` and restart the event loop.'
+        ],
+        correct: [1],
+        explanation: 'Calling `process.exit(0)` immediately drops all active in-flight client HTTP requests mid-processing. Calling `server.close(callback)` stops accepting new connections while letting existing requests complete before closing DB connections and exiting.'
+      }
+    ];
+
+    const CODING_TASKS = [
+      {
+        title: 'Task 1 (JavaScript): Async Concurrency Pool (`runWithConcurrency`)',
+        desc: 'Implement `runWithConcurrency(tasks, limit)` which executes an array of async task factories `() => Promise<T>` with at most `limit` promises in-flight simultaneously, resolving to an array of results in the exact input order.',
+        starter: `async function runWithConcurrency(tasks, limit) {
+  // Write your implementation here:
+  // - Never exceed \`limit\` concurrent tasks in flight
+  // - Preserve the exact order of results matching \`tasks\`
+  
+}`,
+        solution: `async function runWithConcurrency(tasks, limit) {
+  if (!Array.isArray(tasks) || tasks.length === 0) return [];
+  const concurrency = Math.max(1, Math.min(limit, tasks.length));
+  const results = new Array(tasks.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < tasks.length) {
+      const currentIndex = nextIndex++;
+      results[currentIndex] = await tasks[currentIndex]();
+    }
+  }
+
+  await Promise.all(Array.from({ length: concurrency }, () => worker()));
+  return results;
+}`,
+        testRunner: async (userCode) => {
+          const fn = new Function(`${userCode}; return runWithConcurrency;`)();
+          const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+          let active = 0, maxActive = 0;
+          const delays = [50, 10, 40, 15, 25];
+          const tasks = delays.map((d, i) => async () => {
+            active++;
+            maxActive = Math.max(maxActive, active);
+            await sleep(d);
+            active--;
+            return `val-${i}`;
+          });
+          const res = await fn(tasks, 2);
+          const expected = ['val-0', 'val-1', 'val-2', 'val-3', 'val-4'];
+          if (maxActive > 2) throw new Error(`Concurrency limit violated! Max in-flight was ${maxActive}, expected <= 2`);
+          if (JSON.stringify(res) !== JSON.stringify(expected)) {
+            throw new Error(`Order mismatch! Expected ${JSON.stringify(expected)}, got ${JSON.stringify(res)}`);
+          }
+          const emptyRes = await fn([], 3);
+          if (!Array.isArray(emptyRes) || emptyRes.length !== 0) throw new Error('Empty array should resolve to []');
+          return '✔ Test 1 Passed: Concurrency limit (2) strictly respected (maxActive = 2)\n✔ Test 2 Passed: Output order preserved ["val-0", "val-1", "val-2", "val-3", "val-4"]\n✔ Test 3 Passed: Empty task list handled cleanly';
+        }
+      },
+      {
+        title: 'Task 2 (React): Immutable Task Board Reducer (`taskBoardReducer`)',
+        desc: 'Implement a pure React reducer `taskBoardReducer(state, action)` supporting `ADD_TASK`, `MOVE_TASK`, and `TOGGLE_DONE` without mutating the frozen incoming state.',
+        starter: `function taskBoardReducer(state, action) {
+  // Actions:
+  // 1. { type: 'ADD_TASK', payload: { id, title, column } } -> adds { id, title, column, done: false }
+  // 2. { type: 'MOVE_TASK', payload: { id, targetColumn } }
+  // 3. { type: 'TOGGLE_DONE', payload: { id } }
+  switch (action.type) {
+    default:
+      return state;
+  }
+}`,
+        solution: `function taskBoardReducer(state, action) {
+  switch (action.type) {
+    case 'ADD_TASK': {
+      const { id, title, column } = action.payload;
+      return {
+        ...state,
+        tasks: [...state.tasks, { id, title, column, done: false }]
+      };
+    }
+    case 'MOVE_TASK': {
+      const { id, targetColumn } = action.payload;
+      return {
+        ...state,
+        tasks: state.tasks.map(t => t.id === id ? { ...t, column: targetColumn } : t)
+      };
+    }
+    case 'TOGGLE_DONE': {
+      const { id } = action.payload;
+      return {
+        ...state,
+        tasks: state.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t)
+      };
+    }
+    default:
+      return state;
+  }
+}`,
+        testRunner: async (userCode) => {
+          const reducer = new Function(`${userCode}; return taskBoardReducer;`)();
+          const initial = Object.freeze({
+            tasks: Object.freeze([
+              Object.freeze({ id: '1', title: 'Setup CI', column: 'todo', done: false })
+            ])
+          });
+          const s1 = reducer(initial, { type: 'ADD_TASK', payload: { id: '2', title: 'Write Tests', column: 'todo' } });
+          if (s1.tasks.length !== 2 || s1.tasks === initial.tasks) throw new Error('ADD_TASK failed or mutated array');
+          const s2 = reducer(s1, { type: 'MOVE_TASK', payload: { id: '1', targetColumn: 'doing' } });
+          if (s2.tasks[0].column !== 'doing' || initial.tasks[0].column !== 'todo') throw new Error('MOVE_TASK failed');
+          const s3 = reducer(s2, { type: 'TOGGLE_DONE', payload: { id: '1' } });
+          if (s3.tasks[0].done !== true) throw new Error('TOGGLE_DONE failed');
+          return '✔ Test 1 Passed: ADD_TASK returns new state reference with added task\n✔ Test 2 Passed: MOVE_TASK updates targetColumn immutably (Object.freeze intact)\n✔ Test 3 Passed: TOGGLE_DONE flips boolean flag immutably';
+        }
+      },
+      {
+        title: 'Task 3 (Node.js / Express): Sliding-Window Rate Limiter Middleware',
+        desc: 'Implement `createRateLimiter({ windowMs, maxRequests, nowFn })` returning an Express middleware `(req, res, next)` that tracks timestamps per `req.ip`, sets `X-RateLimit-Limit` and `X-RateLimit-Remaining`, and responds with HTTP 429 `{ error: "Too Many Requests" }` when exceeded.',
+        starter: `function createRateLimiter({ windowMs = 60000, maxRequests = 5, nowFn = () => Date.now() } = {}) {
+  // Return (req, res, next) => { ... }
+  
+}`,
+        solution: `function createRateLimiter({ windowMs = 60000, maxRequests = 5, nowFn = () => Date.now() } = {}) {
+  const store = new Map();
+  return function (req, res, next) {
+    const ip = req.ip || '127.0.0.1';
+    const now = nowFn();
+    const valid = (store.get(ip) || []).filter(ts => ts > now - windowMs);
+    res.setHeader('X-RateLimit-Limit', String(maxRequests));
+    if (valid.length >= maxRequests) {
+      store.set(ip, valid);
+      res.setHeader('X-RateLimit-Remaining', '0');
+      return res.status(429).json({ error: 'Too Many Requests' });
+    }
+    valid.push(now);
+    store.set(ip, valid);
+    res.setHeader('X-RateLimit-Remaining', String(maxRequests - valid.length));
+    return next();
+  };
+}`,
+        testRunner: async (userCode) => {
+          const factory = new Function(`${userCode}; return createRateLimiter;`)();
+          let now = 1000;
+          const mw = factory({ windowMs: 1000, maxRequests: 2, nowFn: () => now });
+          const invoke = (ip) => {
+            const headers = {};
+            let status = 200, body = null, nextCalled = false;
+            mw(
+              { ip },
+              {
+                setHeader: (k, v) => { headers[k] = v; },
+                status: function (c) { status = c; return this; },
+                json: function (b) { body = b; return this; }
+              },
+              () => { nextCalled = true; }
+            );
+            return { headers, status, body, nextCalled };
+          };
+          const r1 = invoke('1.1.1.1');
+          now = 1400;
+          const r2 = invoke('1.1.1.1');
+          now = 1800;
+          const r3 = invoke('1.1.1.1');
+          if (!r1.nextCalled || !r2.nextCalled) throw new Error('First 2 requests should call next()');
+          if (r3.nextCalled || r3.status !== 429) throw new Error('3rd request within window must return 429 and NOT call next()');
+          now = 2100;
+          const r4 = invoke('1.1.1.1');
+          if (!r4.nextCalled) throw new Error('4th request after sliding window expiry should be allowed');
+          return '✔ Test 1 Passed: Requests within limit set X-RateLimit-Remaining and call next()\n✔ Test 2 Passed: Exceeding maxRequests returns HTTP 429 and blocks next()\n✔ Test 3 Passed: Sliding window expires old timestamps accurately';
+        }
+      }
+    ];
+
+    let mode = 'exam';
+    let currentTrack = 'ALL';
+    let filteredIndices = QUESTIONS.map((_, idx) => idx);
+    let currentPos = 0;
+    let userAnswers = {}; // questionId -> array of selected option indices
+    let flagged = new Set();
+    let revealed = new Set();
+    let submitted = false;
+    let secondsRemaining = 60 * 60;
+    let currentCodingIdx = 0;
+
+    function formatInlineCode(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+      document.getElementById('modeExamBtn').classList.toggle('active', mode === 'exam');
+      document.getElementById('modeStudyBtn').classList.toggle('active', mode === 'study');
+      renderQuestion();
+    }
+
+    function filterTrack(track) {
+      currentTrack = track;
+      document.querySelectorAll('.track-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.track === track);
+      });
+      document.getElementById('mcqContainer').style.display = 'block';
+      document.getElementById('navigatorCard').style.display = 'block';
+      document.getElementById('codingContainer').style.display = 'none';
+
+      filteredIndices = QUESTIONS
+        .map((q, idx) => ({ q, idx }))
+        .filter(item => track === 'ALL' || item.q.category === track)
+        .map(item => item.idx);
+
+      currentPos = 0;
+      renderNavigator();
+      renderQuestion();
+    }
+
+    function showCodingChallenges() {
+      document.querySelectorAll('.track-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.track === 'CODING');
+      });
+      document.getElementById('mcqContainer').style.display = 'none';
+      document.getElementById('codingContainer').style.display = 'block';
+      selectCodingTask(currentCodingIdx);
+    }
+
+    function selectCodingTask(idx) {
+      currentCodingIdx = idx;
+      const task = CODING_TASKS[idx];
+      document.getElementById('codingTitle').textContent = task.title;
+      document.getElementById('codingDesc').innerHTML = formatInlineCode(task.desc);
+      document.getElementById('codingEditor').value = task.starter;
+      document.getElementById('codingOutput').textContent = 'Ready. Click "Run Automated Unit Tests" to test your solution.';
+    }
+
+    function loadCodingSolution() {
+      document.getElementById('codingEditor').value = CODING_TASKS[currentCodingIdx].solution;
+    }
+
+    function resetCodingStarter() {
+      document.getElementById('codingEditor').value = CODING_TASKS[currentCodingIdx].starter;
+    }
+
+    async function runBrowserCodingTests() {
+      const out = document.getElementById('codingOutput');
+      out.textContent = 'Running unit tests...';
+      try {
+        const msg = await CODING_TASKS[currentCodingIdx].testRunner(
+          document.getElementById('codingEditor').value
+        );
+        out.style.borderColor = 'var(--success)';
+        out.style.color = '#34d399';
+        out.textContent = msg;
+      } catch (err) {
+        out.style.borderColor = 'var(--danger)';
+        out.style.color = '#f87171';
+        out.textContent = '✖ Test Failure:\n' + (err.message || String(err));
+      }
+    }
+
+    function isQuestionCorrect(q) {
+      const ans = userAnswers[q.id] || [];
+      if (ans.length !== q.correct.length) return false;
+      const sortedA = [...ans].sort();
+      const sortedB = [...q.correct].sort();
+      return sortedA.every((v, i) => v === sortedB[i]);
+    }
+
+    function renderNavigator() {
+      const grid = document.getElementById('questionGrid');
+      grid.innerHTML = '';
+
+      filteredIndices.forEach((qIdx, pos) => {
+        const q = QUESTIONS[qIdx];
+        const btn = document.createElement('button');
+        btn.className = 'q-pill';
+        btn.textContent = q.id;
+        if (pos === currentPos) btn.classList.add('current');
+
+        const hasAns = (userAnswers[q.id] || []).length > 0;
+        if (submitted || (mode === 'study' && revealed.has(q.id))) {
+          btn.classList.add(isQuestionCorrect(q) ? 'correct' : 'wrong');
+        } else if (flagged.has(q.id)) {
+          btn.classList.add('flagged');
+        } else if (hasAns) {
+          btn.classList.add('answered');
+        }
+
+        btn.onclick = () => {
+          currentPos = pos;
+          renderNavigator();
+          renderQuestion();
+        };
+        grid.appendChild(btn);
+      });
+
+      const answeredTotal = QUESTIONS.filter(q => (userAnswers[q.id] || []).length > 0).length;
+      document.getElementById('answeredCount').textContent = answeredTotal;
+    }
+
+    function renderQuestion() {
+      const qIdx = filteredIndices[currentPos];
+      const q = QUESTIONS[qIdx];
+      const selected = userAnswers[q.id] || [];
+      const showAns = submitted || mode === 'study' && revealed.has(q.id);
+
+      const badge = document.getElementById('qCategoryBadge');
+      badge.textContent = q.category;
+      badge.className = 'badge ' + (
+        q.category === 'JavaScript' ? 'badge-js' :
+          q.category === 'React' ? 'badge-react' : 'badge-node'
+      );
+
+      document.getElementById('qNumberLabel').textContent = `Question ${q.id} of ${QUESTIONS.length}`;
+      document.getElementById('qTopicTag').textContent = q.topic;
+
+      const selectTag = document.getElementById('qSelectTypeTag');
+      if (q.multi) {
+        selectTag.textContent = 'Multi-Select (Choose 2)';
+        selectTag.className = 'question-type-tag multi';
+      } else {
+        selectTag.textContent = 'Single Choice';
+        selectTag.className = 'question-type-tag';
+      }
+
+      document.getElementById('flagBtn').textContent = flagged.has(q.id) ? '🚩 Flagged' : '🏳️ Flag for Review';
+      document.getElementById('qPrompt').innerHTML = formatInlineCode(q.prompt);
+
+      const snippetEl = document.getElementById('qSnippet');
+      if (q.snippet) {
+        snippetEl.style.display = 'block';
+        snippetEl.textContent = q.snippet;
+      } else {
+        snippetEl.style.display = 'none';
+      }
+
+      const optionsEl = document.getElementById('qOptions');
+      optionsEl.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      q.options.forEach((optText, idx) => {
+        const row = document.createElement('div');
+        row.className = 'option-item';
+        const isSelected = selected.includes(idx);
+        const isCorrectOpt = q.correct.includes(idx);
+
+        if (isSelected) row.classList.add('selected');
+        if (showAns) {
+          if (isCorrectOpt) row.classList.add('correct-reveal');
+          else if (isSelected && !isCorrectOpt) row.classList.add('wrong-reveal');
+        }
+
+        row.innerHTML = `
+          <div class="option-marker ${q.multi ? 'checkbox' : ''}">${letters[idx]}</div>
+          <div class="option-content">${formatInlineCode(optText)}</div>
+        `;
+
+        row.onclick = () => {
+          if (submitted) return;
+          const curr = userAnswers[q.id] ? [...userAnswers[q.id]] : [];
+          if (q.multi) {
+            const exists = curr.indexOf(idx);
+            if (exists >= 0) curr.splice(exists, 1);
+            else curr.push(idx);
+            userAnswers[q.id] = curr;
+          } else {
+            userAnswers[q.id] = [idx];
+            if (mode === 'study') revealed.add(q.id);
+          }
+          renderNavigator();
+          renderQuestion();
+        };
+
+        optionsEl.appendChild(row);
+      });
+
+      const expBox = document.getElementById('qExplanation');
+      if (showAns) {
+        expBox.style.display = 'block';
+        document.getElementById('qExplanationText').innerHTML = formatInlineCode(q.explanation);
+      } else {
+        expBox.style.display = 'none';
+      }
+
+      document.getElementById('prevBtn').disabled = currentPos === 0;
+      document.getElementById('nextBtn').disabled = currentPos === filteredIndices.length - 1;
+    }
+
+    function navigateQuestion(delta) {
+      const next = currentPos + delta;
+      if (next >= 0 && next < filteredIndices.length) {
+        currentPos = next;
+        renderNavigator();
+        renderQuestion();
+      }
+    }
+
+    function toggleFlag() {
+      const q = QUESTIONS[filteredIndices[currentPos]];
+      if (flagged.has(q.id)) flagged.delete(q.id);
+      else flagged.add(q.id);
+      renderNavigator();
+      renderQuestion();
+    }
+
+    function revealCurrentAnswer() {
+      const q = QUESTIONS[filteredIndices[currentPos]];
+      revealed.add(q.id);
+      mode = 'study';
+      document.getElementById('modeExamBtn').classList.remove('active');
+      document.getElementById('modeStudyBtn').classList.add('active');
+      renderNavigator();
+      renderQuestion();
+    }
+
+    function submitAssessment() {
+      submitted = true;
+      const calcScore = (cat) => {
+        const subset = cat ? QUESTIONS.filter(q => q.category === cat) : QUESTIONS;
+        const correct = subset.filter(isQuestionCorrect).length;
+        return { correct, total: subset.length, pct: Math.round((correct / subset.length) * 100) };
+      };
+
+      const overall = calcScore(null);
+      const js = calcScore('JavaScript');
+      const react = calcScore('React');
+      const node = calcScore('Node.js');
+
+      const panel = document.getElementById('resultsPanel');
+      panel.style.display = 'block';
+      panel.innerHTML = `
+        <h3 style="margin-bottom: 1rem;">BairesDev Assessment Score Report</h3>
+        <div class="score-banner">
+          <div class="stat-box">
+            <div style="color: var(--text-muted); font-size: 0.85rem;">Overall Score</div>
+            <div class="value" style="color: ${overall.pct >= 80 ? 'var(--success)' : 'var(--brand)'}">${overall.pct}%</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${overall.correct} / ${overall.total} (${overall.pct >= 80 ? 'Top 10% Pass' : 'Keep Practicing'})</div>
+          </div>
+          <div class="stat-box">
+            <div style="color: var(--js-color); font-size: 0.85rem;">JavaScript Core</div>
+            <div class="value">${js.pct}%</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${js.correct} / ${js.total}</div>
+          </div>
+          <div class="stat-box">
+            <div style="color: var(--react-color); font-size: 0.85rem;">React & Hooks</div>
+            <div class="value">${react.pct}%</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${react.correct} / ${react.total}</div>
+          </div>
+          <div class="stat-box">
+            <div style="color: var(--node-color); font-size: 0.85rem;">Node.js & Express</div>
+            <div class="value">${node.pct}%</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${node.correct} / ${node.total}</div>
+          </div>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">All explanations are now unlocked below. Click any question number in the navigator to inspect answers.</p>
+      `;
+
+      renderNavigator();
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    setInterval(() => {
+      if (submitted || mode !== 'exam') return;
+      if (secondsRemaining > 0) {
+        secondsRemaining--;
+        const mins = String(Math.floor(secondsRemaining / 60)).padStart(2, '0');
+        const secs = String(secondsRemaining % 60).padStart(2, '0');
+        const el = document.getElementById('timerDisplay');
+        el.textContent = `⏱ ${mins}:${secs}`;
+        if (secondsRemaining < 300) el.classList.add('warning');
+      } else {
+        submitAssessment();
+      }
+    }, 1000);
+
+    renderNavigator();
+    renderQuestion();
+  </script>
+</body>
+
+</html>

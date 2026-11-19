@@ -1,0 +1,12 @@
+{
+  "name": "bairesdev-js-react-node-assessment",
+  "version": "1.0.0",
+  "description": "BairesDev Online Skills Assessment Practice Suite (JavaScript, React, Node.js)",
+  "scripts": {
+    "test": "node --test challenges/assessment.test.js",
+    "test:solutions": "node challenges/run-solutions-test.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
